@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fuel Efficiency Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+        }
+        form {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        .output {
+            background-color: #f9f9f9;
+            border: 1px solid #ccc;
+            padding: 15px;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Fuel Efficiency Calculator</h1>
+        <form id="fuelCalcForm">
+            <!-- Currency Selection -->
+            <label for="currency">Select Currency:</label>
+            <select id="currency" name="currency" required>
+                <option value="PKR">PKR</option>
+                <option value="USD">USD</option>
+            </select>
+
+            <label for="fuelEfficiency">Car Average (km/l or mpg):</label>
+            <input type="number" id="fuelEfficiency" name="fuelEfficiency" step="0.1" required>
+
+            <label for="fuelPrice">Fuel Price per Liter (or Gallon):</label>
+            <input type="number" id="fuelPrice" name="fuelPrice" step="0.01" required>
+
+            <label for="engineCapacity">Car's Engine Capacity (cc):</label>
+            <input type="number" id="engineCapacity" name="engineCapacity" required>
+
+            <label for="terrainType">Type of Terrain:</label>
+            <select id="terrainType" name="terrainType" required>
+                <option value="flat">Flat</option>
+                <option value="uphill">Uphill</option>
+                <option value="downhill">Downhill</option>
+                <option value="motorway">Motorway</option>
+            </select>
+
+            <label for="tripDistance">Total Distance of Trip (km or miles):</label>
+            <input type="number" id="tripDistance" name="tripDistance" step="0.1" required>
+
+            <button type="submit">Calculate</button>
+        </form>
+        <div id="output" class="output" style="display:none;">
+            <h2>Estimated Fuel Cost</h2>
+            <p id="result"></p>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('fuelCalcForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            // Get user inputs
+            const fuelEfficiency = parseFloat(document.getElementById('fuelEfficiency').value);
+            const fuelPrice = parseFloat(document.getElementById('fuelPrice').value);
+            const engineCapacity = parseInt(document.getElementById('engineCapacity').value);
+            const terrainType = document.getElementById('terrainType').value;
+            const tripDistance = parseFloat(document.getElementById('tripDistance').value);
+            const currency = document.getElementById('currency').value; // Get the selected currency
+
+            // Adjust fuel efficiency based on terrain type
+            let efficiencyMultiplier = 1;
+            if (terrainType === 'uphill') {
+                efficiencyMultiplier = 0.7; // 30% less efficient for uphill
+            } else if (terrainType === 'downhill') {
+                efficiencyMultiplier = 1.2; // 20% more efficient for downhill
+            } else if (terrainType === 'motorway') {
+                efficiencyMultiplier = 1.1; // 10% more efficient for motorway
+            }
+
+            // Adjust fuel efficiency based on engine capacity
+            let engineMultiplier = 1;
+            if (engineCapacity > 2000) {
+                engineMultiplier = 0.8; // 20% less efficient for large engines
+            } else if (engineCapacity < 1000) {
+                engineMultiplier = 1.1; // 10% more efficient for smaller engines
+            }
+
+            // Calculate adjusted fuel efficiency
+            const adjustedEfficiency = fuelEfficiency * efficiencyMultiplier * engineMultiplier;
+
+            // Calculate fuel consumption and cost
+            const fuelConsumed = tripDistance / adjustedEfficiency;
+            const fuelCost = fuelConsumed * fuelPrice;
+
+            // Determine currency symbol based on user selection
+            let currencySymbol = '';
+            if (currency === 'USD') {
+                currencySymbol = '$';
+            } else if (currency === 'PKR') {
+                currencySymbol = 'Rs.';
+            }
+
+            // Display result with the correct currency symbol
+            document.getElementById('output').style.display = 'block';
+            document.getElementById('result').textContent = `
+                For a trip of ${tripDistance.toFixed(1)} km, with a fuel price of ${currencySymbol}${fuelPrice.toFixed(2)} per liter,
+                your estimated fuel cost is ${currencySymbol}${fuelCost.toFixed(2)}.
+            `;
+        });
+    </script>
+</body>
+</html>
